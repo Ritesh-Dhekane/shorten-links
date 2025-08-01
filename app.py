@@ -13,37 +13,111 @@ hashids = Hashids(min_length=4, salt="this is my salt")  # Use your own salt!
 # HTML templates (for simplicity, using template_string)
 INDEX_HTML = '''
 <!DOCTYPE html>
-<html>
-<head><title>Link Shortener</title></head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Link Shortener</title>
+  <!-- Bootstrap 5 CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    main {
+      flex: 1 0 auto;
+    }
+    footer {
+      flex-shrink: 0;
+      background-color: #f8f9fa;
+      padding: 1rem 0;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #6c757d;
+      border-top: 1px solid #dee2e6;
+      margin-top: 3rem;
+    }
+  </style>
+</head>
 <body>
-    <h2>Shorten a URL</h2>
-    <form method="post" action="/">
-        <input type="text" name="url" placeholder="Enter long URL" required size="50">
-        <input type="submit" value="Shorten">
-    </form>
+  <main class="container py-5">
+    <div class="text-center mb-4">
+      <h1 class="fw-bold">Simple Link Shortener</h1>
+      <p class="text-muted">Shorten your URLs quickly and easily</p>
+    </div>
+    
+    <!-- Flash messages -->
     {% with messages = get_flashed_messages() %}
       {% if messages %}
-        <ul>
+      <div class="alert alert-info alert-dismissible fade show" role="alert">
         {% for message in messages %}
-          <li>{{ message }}</li>
+          <div>{{ message }}</div>
         {% endfor %}
-        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
       {% endif %}
     {% endwith %}
+    
+    <!-- URL input form -->
+    <form method="post" action="/" class="row g-3 justify-content-center mb-5">
+      <div class="col-sm-8 col-md-6 col-lg-5">
+        <input
+          type="url"
+          name="url"
+          id="url-input"
+          placeholder="Enter a long URL to shorten"
+          class="form-control form-control-lg"
+          required
+          autofocus
+        />
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary btn-lg px-4">Shorten</button>
+      </div>
+    </form>
+    
+    <!-- Show short URL -->
     {% if short_url %}
-        <h3>Your Short URL: <a href="{{ short_url }}">{{ short_url }}</a></h3>
+    <div class="text-center mb-5">
+      <h5>Your Short URL:</h5>
+      <a href="{{ short_url }}" target="_blank" class="link-primary fs-5">{{ short_url }}</a>
+    </div>
     {% endif %}
-    <hr>
-    <h4>Previously Shortened Links:</h4>
-    <ul>
-    {% for row in rows %}
-        <li><a href="{{ request.url_root }}{{ row.short }}">
-              {{ request.url_root }}{{ row.short }}</a> &rarr; {{ row.original_url }}</li>
-    {% endfor %}
-    </ul>
+    
+    <!-- Recently shortened URLs -->
+    <section>
+      <h4 class="mb-3">Recently Shortened Links</h4>
+      {% if rows %}
+      <ul class="list-group">
+        {% for row in rows %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <a href="{{ request.url_root }}{{ row.short }}" target="_blank" class="text-decoration-none">
+            {{ request.url_root }}{{ row.short }}
+          </a>
+          <span class="text-truncate ms-3 text-muted" style="max-width: 70%">
+            → {{ row.original_url }}
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="text-muted">No links shortened yet.</p>
+      {% endif %}
+    </section>
+  </main>
+  
+  <footer>
+    &copy; 2025 Ritesh Dhekane
+  </footer>
+  
+  <!-- Bootstrap 5 JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 '''
+
 
 def get_db():
     conn = sqlite3.connect(DATABASE)
